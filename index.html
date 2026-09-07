@@ -386,63 +386,57 @@
   .about-wrap strong{ color:var(--text-primary); font-weight:500; }
 
   /* CTF SECTION */
- /* Replace your existing .ctf-toolbar, .ctf-grid, .ctf-card-body, .ctf-tags,
-   .ctf-card h3, .ctf-card p, and .ctf-card .ctf-date rules with these */
+  .ctf-toolbar{
+    display:flex; justify-content:center; gap:14px; margin-bottom:44px; flex-wrap:wrap;
+  }
+  .ctf-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:20px;
+  }
+  .ctf-empty{
+    text-align:center; color:var(--text-muted); padding:50px 20px;
+    border:1px dashed var(--divider); border-radius:8px;
+    font-size:.95rem;
+  }
+  .ctf-card{
+    border:1px solid var(--divider);
+    border-radius:8px;
+    overflow:hidden;
+    background:rgba(255,255,255,0.02);
+    cursor:pointer;
+    transition:.25s ease;
+    display:flex; flex-direction:column;
+  }
+  .ctf-card:hover{ border-color:var(--accent); transform:translateY(-3px); }
+  .ctf-card .ctf-thumb{
+    width:100%; height:160px; object-fit:cover;
+    background:linear-gradient(135deg,var(--bg-mid),var(--bg-deep));
+    display:block;
+  }
+  .ctf-card .ctf-thumb.placeholder{
+    display:flex; align-items:center; justify-content:center;
+    color:var(--divider); font-family:'JetBrains Mono',monospace; font-size:12px;
+  }
+  .ctf-card-body{ padding:18px 20px 22px; flex:1; display:flex; flex-direction:column; }
+  .ctf-tags{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .ctf-tag{
+    font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent-dim); border:1px solid var(--divider); border-radius:999px; padding:3px 10px;
+  }
+  .ctf-card h3{
+    font-family:'Cormorant Garamond',serif; font-weight:500; font-size:1.4rem; margin-bottom:8px;
+  }
+  .ctf-card p{ color:var(--text-muted); font-size:.88rem; line-height:1.6; flex:1; }
+  .ctf-card .ctf-date{
+    margin-top:14px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--footer-dim);
+  }
+  .ctf-card .ctf-del{
+    align-self:flex-end; margin-top:10px; background:none; border:none; color:#5c7686;
+    font-family:'JetBrains Mono',monospace; font-size:11px; cursor:pointer; padding:0;
+  }
+  .ctf-card .ctf-del:hover{ color:#e6667a; }
 
-.ctf-toolbar{
-  display:flex; justify-content:center; gap:16px; margin-bottom:56px; flex-wrap:wrap;
-}
-
-.ctf-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:32px;
-}
-
-.ctf-card-body{
-  padding:26px 26px 24px;
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-
-.ctf-tags{
-  display:flex; gap:8px; flex-wrap:wrap;
-  margin-bottom:16px;
-}
-
-.ctf-card h3{
-  font-family:'Cormorant Garamond',serif;
-  font-weight:500;
-  font-size:1.4rem;
-  margin-bottom:12px;
-  line-height:1.3;
-}
-
-.ctf-card p{
-  color:var(--text-muted);
-  font-size:.9rem;
-  line-height:1.7;
-  flex:1;
-  margin-bottom:20px;
-}
-
-.ctf-card .ctf-date{
-  margin-top:auto;
-  padding-top:16px;
-  border-top:1px solid var(--divider);
-  font-family:'JetBrains Mono',monospace;
-  font-size:10.5px;
-  color:var(--footer-dim);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-/* thumbnail gets a touch more breathing room from the card edge */
-.ctf-card .ctf-thumb{
-  height:170px;
-}
   /* modal */
   .ctf-modal{
     position:fixed; inset:0; z-index:1000;
@@ -697,7 +691,7 @@
     <div class="platform-card"><span class="tier">Creative Platform</span><span class="name">Pixiv</span></div>
     <div class="platform-card"><span class="tier">Social Commerce</span><span class="name">Meesho</span></div>
     <div class="platform-card"><span class="tier">Quick Commerce</span><span class="name">Blinkit / Hyperpure</span></div>
-  
+    <div class="platform-card"><span class="tier">Infrastructure</span><span class="name">Kong</span></div>
     <div class="platform-card"><span class="tier">E-commerce</span><span class="name">Flipkart</span></div>
     <div class="platform-card"><span class="tier">Fintech</span><span class="name">bancoplata.mx</span></div>
   </div>
@@ -796,27 +790,16 @@
   </div>
 
   <!-- Admin-only toolbar, hidden until logged in -->
- 
-   <div id="ctfAdminControls" class="hidden" style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
-      <button class="btn primary" id="ctfAddBtn">+ Add Walkthrough</button>
-      <button class="btn ghost" id="ctfExportBtn">Export Data</button>
-      <button class="btn ghost" id="ctfLogoutBtn">Log Out</button>
-    </div>
-  </div>
-
-  <div id="ctfGrid" class="ctf-grid"></div>
-
-  <!-- Hidden admin login popover -->
-<div class="ctf-toolbar">
+  <div class="ctf-toolbar">
     <div id="ctfAdminControls" class="hidden" style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
       <button class="btn primary" id="ctfAddBtn">+ Add Walkthrough</button>
       <button class="btn ghost" id="ctfExportBtn">Export Data</button>
       <button class="btn ghost" id="ctfLogoutBtn">Log Out</button>
     </div>
   </div>
- 
+
   <div id="ctfGrid" class="ctf-grid"></div>
- 
+
   <!-- Hidden admin login popover -->
   <div class="ctf-modal hidden" id="ctfLoginModal">
     <div class="ctf-modal-content" style="max-width:360px;">
@@ -894,7 +877,7 @@
     </div>
     <div>
       <span class="eyebrow">About</span>
-      <p style="margin-top:18px;"> <strong>Sarmansinh Solanki</strong>, security researcher working across <strong>HackerOne</strong> and <strong>Bugcrowd</strong>, focused on web application security — the layer where authentication, business logic, and trust boundaries actually break.</p>
+      <p style="margin-top:18px;">I'm <strong>Sarmansinh Solanki</strong>, a security researcher working across <strong>HackerOne</strong> and <strong>Bugcrowd</strong>, focused on web application security — the layer where authentication, business logic, and trust boundaries actually break.</p>
       <p>My process starts with recon: mapping the real surface before touching a single endpoint. From there it's tracing auth flows, chaining smaller findings into something that matters, and writing it up clearly enough that a triager doesn't have to guess.</p>
     </div>
   </div>
@@ -1003,7 +986,7 @@
     loginModal.classList.add('hidden');
     history.replaceState(null, '', window.location.pathname + window.location.search);
   });
- 
+  loginModal.addEventListener('click', function(ev){ if(ev.target === loginModal) loginModal.classList.add('hidden'); });
 
   document.getElementById('ctfLoginBtn').addEventListener('click', function(){
     var email = document.getElementById('ctfLoginEmail').value.trim();
@@ -1252,8 +1235,69 @@
     });
   });
 
+  /* ---------- delete / view ---------- */
+  grid.addEventListener('click', function(ev){
+    var delId = ev.target.getAttribute('data-del');
+    if(delId){
+      ev.stopPropagation();
+      if(confirm('Delete this walkthrough?')){
+        sb.from('ctf_writeups').delete().eq('id', delId).then(function(res){
+          if(res.error){ alert('Could not delete: ' + res.error.message); return; }
+          render();
+        });
+      }
+      return;
+    }
+    var card = ev.target.closest('.ctf-card');
+    if(card){
+      var id = card.getAttribute('data-id');
+      loadEntries().then(function(entries){
+        var entry = entries.find(function(e){ return e.id === id; });
+        if(entry) openView(entry);
+      });
+    }
+  });
 
- 
+  function openView(e){
+    var tags = (e.category||'').split(',').map(function(t){
+      t = t.trim(); return t ? '<span class="ctf-tag">'+escapeHtml(t)+'</span>' : '';
+    }).join('');
+    var flagHtml = e.flag ? '<div class="ctf-view-flag">'+escapeHtml(e.flag)+'</div><br>' : '';
+    var summaryHtml = e.summary ? '<div class="ctf-view-summary">'+escapeHtml(e.summary)+'</div>' : '';
+    var vulnHtml = e.vuln_explainer
+      ? '<div class="ctf-view-section"><span class="section-label">Suggested Explanation of the Vulnerability</span><p>'+escapeHtml(e.vuln_explainer)+'</p></div>'
+      : '';
+    var notesHtml = e.notes
+      ? '<div class="ctf-view-section"><span class="section-label">Notes &amp; Corrections</span><p>'+escapeHtml(e.notes)+'</p></div>'
+      : '';
+
+    var stepsHtml = (e.steps||[]).map(function(step, i){
+      var text = step.text ? '<p>'+escapeHtml(step.text)+'</p>' : '';
+      var imgs = (step.imagePaths||[]).map(function(path){
+        var url = publicUrl(path);
+        return url ? '<img src="'+url+'">' : '';
+      }).join('');
+      return '<div class="ctf-view-step"><span class="step-label">Step '+(i+1)+'</span>'+text
+        + (imgs ? '<div class="ctf-view-imgs">'+imgs+'</div>' : '')
+        + '</div>';
+    }).join('');
+
+    viewContent.innerHTML = '<button class="ctf-modal-close" id="ctfViewClose">&times;</button>'
+      + '<h3>'+escapeHtml(e.title)+'</h3>'
+      + '<div class="ctf-view-tags">'+(e.platform?'<span class="ctf-tag">'+escapeHtml(e.platform)+'</span>':'')+tags+'</div>'
+      + flagHtml
+      + summaryHtml
+      + stepsHtml
+      + vulnHtml
+      + notesHtml;
+
+    viewModal.classList.remove('hidden');
+    document.getElementById('ctfViewClose').addEventListener('click', function(){
+      viewModal.classList.add('hidden');
+    });
+  }
+  viewModal.addEventListener('click', function(ev){ if(ev.target === viewModal) viewModal.classList.add('hidden'); });
+
   /* ---------- export ---------- */
   document.getElementById('ctfExportBtn').addEventListener('click', function(){
     loadEntries().then(function(entries){
