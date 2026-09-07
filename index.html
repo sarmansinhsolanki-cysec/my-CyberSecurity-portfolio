@@ -386,57 +386,63 @@
   .about-wrap strong{ color:var(--text-primary); font-weight:500; }
 
   /* CTF SECTION */
-  .ctf-toolbar{
-    display:flex; justify-content:center; gap:14px; margin-bottom:44px; flex-wrap:wrap;
-  }
-  .ctf-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-    gap:20px;
-  }
-  .ctf-empty{
-    text-align:center; color:var(--text-muted); padding:50px 20px;
-    border:1px dashed var(--divider); border-radius:8px;
-    font-size:.95rem;
-  }
-  .ctf-card{
-    border:1px solid var(--divider);
-    border-radius:8px;
-    overflow:hidden;
-    background:rgba(255,255,255,0.02);
-    cursor:pointer;
-    transition:.25s ease;
-    display:flex; flex-direction:column;
-  }
-  .ctf-card:hover{ border-color:var(--accent); transform:translateY(-3px); }
-  .ctf-card .ctf-thumb{
-    width:100%; height:160px; object-fit:cover;
-    background:linear-gradient(135deg,var(--bg-mid),var(--bg-deep));
-    display:block;
-  }
-  .ctf-card .ctf-thumb.placeholder{
-    display:flex; align-items:center; justify-content:center;
-    color:var(--divider); font-family:'JetBrains Mono',monospace; font-size:12px;
-  }
-  .ctf-card-body{ padding:18px 20px 22px; flex:1; display:flex; flex-direction:column; }
-  .ctf-tags{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
-  .ctf-tag{
-    font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
-    color:var(--accent-dim); border:1px solid var(--divider); border-radius:999px; padding:3px 10px;
-  }
-  .ctf-card h3{
-    font-family:'Cormorant Garamond',serif; font-weight:500; font-size:1.4rem; margin-bottom:8px;
-  }
-  .ctf-card p{ color:var(--text-muted); font-size:.88rem; line-height:1.6; flex:1; }
-  .ctf-card .ctf-date{
-    margin-top:14px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--footer-dim);
-  }
-  .ctf-card .ctf-del{
-    align-self:flex-end; margin-top:10px; background:none; border:none; color:#5c7686;
-    font-family:'JetBrains Mono',monospace; font-size:11px; cursor:pointer; padding:0;
-  }
-  .ctf-card .ctf-del:hover{ color:#e6667a; }
+ /* Replace your existing .ctf-toolbar, .ctf-grid, .ctf-card-body, .ctf-tags,
+   .ctf-card h3, .ctf-card p, and .ctf-card .ctf-date rules with these */
 
+.ctf-toolbar{
+  display:flex; justify-content:center; gap:16px; margin-bottom:56px; flex-wrap:wrap;
+}
+
+.ctf-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:32px;
+}
+
+.ctf-card-body{
+  padding:26px 26px 24px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.ctf-tags{
+  display:flex; gap:8px; flex-wrap:wrap;
+  margin-bottom:16px;
+}
+
+.ctf-card h3{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:500;
+  font-size:1.4rem;
+  margin-bottom:12px;
+  line-height:1.3;
+}
+
+.ctf-card p{
+  color:var(--text-muted);
+  font-size:.9rem;
+  line-height:1.7;
+  flex:1;
+  margin-bottom:20px;
+}
+
+.ctf-card .ctf-date{
+  margin-top:auto;
+  padding-top:16px;
+  border-top:1px solid var(--divider);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10.5px;
+  color:var(--footer-dim);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+/* thumbnail gets a touch more breathing room from the card edge */
+.ctf-card .ctf-thumb{
+  height:170px;
+}
   /* modal */
   .ctf-modal{
     position:fixed; inset:0; z-index:1000;
