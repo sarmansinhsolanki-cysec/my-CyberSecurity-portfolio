@@ -997,7 +997,7 @@
     loginModal.classList.add('hidden');
     history.replaceState(null, '', window.location.pathname + window.location.search);
   });
-  document.getElementById('ctfLoginOpen').addEventListener('click', function(){ loginError.style.display = 'none'; loginModal.classList.remove('hidden'); document.getElementById('ctfLoginEmail').focus(); }); loginModal.addEventListener('click', function(ev){ if(ev.target === loginModal) loginModal.classList.add('hidden'); });
+ 
 
   document.getElementById('ctfLoginBtn').addEventListener('click', function(){
     var email = document.getElementById('ctfLoginEmail').value.trim();
