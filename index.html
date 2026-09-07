@@ -1235,69 +1235,8 @@
     });
   });
 
-  /* ---------- delete / view ---------- */
-  grid.addEventListener('click', function(ev){
-    var delId = ev.target.getAttribute('data-del');
-    if(delId){
-      ev.stopPropagation();
-      if(confirm('Delete this walkthrough?')){
-        sb.from('ctf_writeups').delete().eq('id', delId).then(function(res){
-          if(res.error){ alert('Could not delete: ' + res.error.message); return; }
-          render();
-        });
-      }
-      return;
-    }
-    var card = ev.target.closest('.ctf-card');
-    if(card){
-      var id = card.getAttribute('data-id');
-      loadEntries().then(function(entries){
-        var entry = entries.find(function(e){ return e.id === id; });
-        if(entry) openView(entry);
-      });
-    }
-  });
 
-  function openView(e){
-    var tags = (e.category||'').split(',').map(function(t){
-      t = t.trim(); return t ? '<span class="ctf-tag">'+escapeHtml(t)+'</span>' : '';
-    }).join('');
-    var flagHtml = e.flag ? '<div class="ctf-view-flag">'+escapeHtml(e.flag)+'</div><br>' : '';
-    var summaryHtml = e.summary ? '<div class="ctf-view-summary">'+escapeHtml(e.summary)+'</div>' : '';
-    var vulnHtml = e.vuln_explainer
-      ? '<div class="ctf-view-section"><span class="section-label">Suggested Explanation of the Vulnerability</span><p>'+escapeHtml(e.vuln_explainer)+'</p></div>'
-      : '';
-    var notesHtml = e.notes
-      ? '<div class="ctf-view-section"><span class="section-label">Notes &amp; Corrections</span><p>'+escapeHtml(e.notes)+'</p></div>'
-      : '';
-
-    var stepsHtml = (e.steps||[]).map(function(step, i){
-      var text = step.text ? '<p>'+escapeHtml(step.text)+'</p>' : '';
-      var imgs = (step.imagePaths||[]).map(function(path){
-        var url = publicUrl(path);
-        return url ? '<img src="'+url+'">' : '';
-      }).join('');
-      return '<div class="ctf-view-step"><span class="step-label">Step '+(i+1)+'</span>'+text
-        + (imgs ? '<div class="ctf-view-imgs">'+imgs+'</div>' : '')
-        + '</div>';
-    }).join('');
-
-    viewContent.innerHTML = '<button class="ctf-modal-close" id="ctfViewClose">&times;</button>'
-      + '<h3>'+escapeHtml(e.title)+'</h3>'
-      + '<div class="ctf-view-tags">'+(e.platform?'<span class="ctf-tag">'+escapeHtml(e.platform)+'</span>':'')+tags+'</div>'
-      + flagHtml
-      + summaryHtml
-      + stepsHtml
-      + vulnHtml
-      + notesHtml;
-
-    viewModal.classList.remove('hidden');
-    document.getElementById('ctfViewClose').addEventListener('click', function(){
-      viewModal.classList.add('hidden');
-    });
-  }
-  viewModal.addEventListener('click', function(ev){ if(ev.target === viewModal) viewModal.classList.add('hidden'); });
-
+ 
   /* ---------- export ---------- */
   document.getElementById('ctfExportBtn').addEventListener('click', function(){
     loadEntries().then(function(entries){
