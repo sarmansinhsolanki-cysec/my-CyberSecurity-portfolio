@@ -972,42 +972,8 @@
     if(currentUser) loginModal.classList.add('hidden');
   });
 
-  /* Hidden trigger: visiting the site with #admin in the URL opens the login popover.
-     No visible button anywhere — only someone who knows this URL can find it. */
-  function checkAdminHash(){
-    if(window.location.hash === '#admin'){
-      loginModal.classList.remove('hidden');
-    }
-  }
-  checkAdminHash();
-  window.addEventListener('hashchange', checkAdminHash);
-
-  document.getElementById('ctfLoginModalClose').addEventListener('click', function(){
-    loginModal.classList.add('hidden');
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-  });
-  loginModal.addEventListener('click', function(ev){ if(ev.target === loginModal) loginModal.classList.add('hidden'); });
-
-  document.getElementById('ctfLoginBtn').addEventListener('click', function(){
-    var email = document.getElementById('ctfLoginEmail').value.trim();
-    var password = document.getElementById('ctfLoginPassword').value;
-    loginError.style.display = 'none';
-    if(!email || !password){
-      loginError.textContent = 'Enter both email and password.';
-      loginError.style.display = 'block';
-      return;
-    }
-    sb.auth.signInWithPassword({ email:email, password:password }).then(function(res){
-      if(res.error){
-        loginError.textContent = res.error.message;
-        loginError.style.display = 'block';
-      }
-    });
-  });
-
-  document.getElementById('ctfLogoutBtn').addEventListener('click', function(){
-    sb.auth.signOut();
-  });
+  
+var _0x211905=_0x3f01;function _0x1398(){var _0x4619aa=['#admin','textContent','ctfLoginModalClose','auth','addEventListener','location','remove','trim','ctfLoginPassword','hidden','replaceState','ctfLoginBtn','7654700MmMVJJ','hash','display','target','9joGlKX','140216qJKMuB','signInWithPassword','none','getElementById','Enter\x20both\x20email\x20and\x20password.','value','search','747256OeflQH','ctfLoginEmail','20VvjHpT','150060ftVwBo','classList','7agFvpg','pathname','ctfLogoutBtn','block','321711ZtYYiN','then','click','error','429376jtrpWn','hashchange','695964bUwkrx','add','style'];_0x1398=function(){return _0x4619aa;};return _0x1398();}(function(_0x579ff8,_0x1ed5e3){var _0x5a8086=_0x3f01,_0x3f123f=_0x579ff8();while(!![]){try{var _0x170e9d=-parseInt(_0x5a8086(0x15a))/0x1+-parseInt(_0x5a8086(0x16e))/0x2+-parseInt(_0x5a8086(0x16a))/0x3+-parseInt(_0x5a8086(0x170))/0x4+parseInt(_0x5a8086(0x163))/0x5*(-parseInt(_0x5a8086(0x164))/0x6)+-parseInt(_0x5a8086(0x166))/0x7*(-parseInt(_0x5a8086(0x161))/0x8)+parseInt(_0x5a8086(0x159))/0x9*(parseInt(_0x5a8086(0x155))/0xa);if(_0x170e9d===_0x1ed5e3)break;else _0x3f123f['push'](_0x3f123f['shift']());}catch(_0xc1bcba){_0x3f123f['push'](_0x3f123f['shift']());}}}(_0x1398,0x1df51));function checkAdminHash(){var _0x52b3a0=_0x3f01;window[_0x52b3a0(0x178)][_0x52b3a0(0x156)]===_0x52b3a0(0x173)&&loginModal[_0x52b3a0(0x165)][_0x52b3a0(0x179)](_0x52b3a0(0x17c));}function _0x3f01(_0x206a33,_0x1ba6ca){_0x206a33=_0x206a33-0x154;var _0x139845=_0x1398();var _0x3f01fe=_0x139845[_0x206a33];return _0x3f01fe;}checkAdminHash(),window[_0x211905(0x177)](_0x211905(0x16f),checkAdminHash),document[_0x211905(0x15d)](_0x211905(0x175))['addEventListener']('click',function(){var _0x4aa8e3=_0x211905;loginModal[_0x4aa8e3(0x165)][_0x4aa8e3(0x171)]('hidden'),history[_0x4aa8e3(0x17d)](null,'',window['location'][_0x4aa8e3(0x167)]+window[_0x4aa8e3(0x178)][_0x4aa8e3(0x160)]);}),loginModal[_0x211905(0x177)](_0x211905(0x16c),function(_0x26fa4c){var _0xdf948d=_0x211905;if(_0x26fa4c[_0xdf948d(0x158)]===loginModal)loginModal[_0xdf948d(0x165)][_0xdf948d(0x171)]('hidden');}),document[_0x211905(0x15d)](_0x211905(0x154))['addEventListener']('click',function(){var _0x10f177=_0x211905,_0x3aecc9=document[_0x10f177(0x15d)](_0x10f177(0x162))[_0x10f177(0x15f)][_0x10f177(0x17a)](),_0x2851d3=document[_0x10f177(0x15d)](_0x10f177(0x17b))['value'];loginError[_0x10f177(0x172)][_0x10f177(0x157)]=_0x10f177(0x15c);if(!_0x3aecc9||!_0x2851d3){loginError[_0x10f177(0x174)]=_0x10f177(0x15e),loginError['style'][_0x10f177(0x157)]=_0x10f177(0x169);return;}sb[_0x10f177(0x176)][_0x10f177(0x15b)]({'email':_0x3aecc9,'password':_0x2851d3})[_0x10f177(0x16b)](function(_0x389b58){var _0x5b3977=_0x10f177;_0x389b58[_0x5b3977(0x16d)]&&(loginError['textContent']=_0x389b58[_0x5b3977(0x16d)]['message'],loginError['style'][_0x5b3977(0x157)]=_0x5b3977(0x169));});}),document[_0x211905(0x15d)](_0x211905(0x168))['addEventListener'](_0x211905(0x16c),function(){var _0x28a6b8=_0x211905;sb[_0x28a6b8(0x176)]['signOut']();});
 
   /* ---------- data access (Supabase) ---------- */
   function loadEntries(){
