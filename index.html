@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web App Security | Bug Bounty & Attack Path Research</title>
+  <meta name="description" content="Web App Security researcher breaking authentication flows, chaining business-logic flaws, and tracing attack paths across live production targets on HackerOne and Bugcrowd.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Subtle Background Grid Pattern -->
+  <div class="grid-background" aria-hidden="true"></div>
+
+  <!-- Primary Framed Layout with Mistral Border-x -->
+  <div class="app-container">
+    
+    <!-- Site Navigation Header -->
+    <header class="site-header">
+      <div class="nav-wrapper">
+        <!-- Brand Logo & Status -->
+        <a href="#hero" class="nav-brand" aria-label="Security Portfolio Home">
+          <div class="pixel-logo-mark" aria-hidden="true">
+            <span style="background-color: var(--flame-1); grid-column: 2 / span 2; grid-row: 1;"></span>
+            <span style="background-color: var(--flame-1); grid-column: 6 / span 2; grid-row: 1;"></span>
+            <span style="background-color: var(--flame-2); grid-column: 2 / span 3; grid-row: 2;"></span>
+            <span style="background-color: var(--flame-2); grid-column: 5 / span 3; grid-row: 2;"></span>
+            <span style="background-color: var(--flame-3); grid-column: 1 / span 8; grid-row: 3;"></span>
+            <span style="background-color: var(--flame-4); grid-column: 2 / span 6; grid-row: 4;"></span>
+            <span style="background-color: var(--flame-5); grid-column: 2 / span 3; grid-row: 5;"></span>
+            <span style="background-color: var(--flame-5); grid-column: 5 / span 3; grid-row: 5;"></span>
+          </div>
+          <div class="brand-text">
+            <span id="navBrandName">SARMANSINH</span>
+            <span style="color: var(--flame-3);">//</span>
+            <span>APPSEC</span>
+            <span class="status-dot" title="Active on HackerOne & Bugcrowd"></span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <ul class="nav-links" id="navLinks">
+          <li class="nav-link-item"><a href="#hero" class="nav-link active">Scope</a></li>
+          <li class="nav-link-item"><a href="#where-i-report" class="nav-link">Platforms</a></li>
+          <li class="nav-link-item"><a href="#targets" class="nav-link">Targets</a></li>
+          <li class="nav-link-item"><a href="#writeups" class="nav-link">Write-ups</a></li>
+          <li class="nav-link-item"><a href="#writeups" class="nav-link" onclick="currentCategory='ctf-walkthroughs'; renderWriteups();">CTFs</a></li>
+        </ul>
+
+        <!-- Right Header Actions -->
+        <div class="nav-actions">
+          <!-- Author Security Lock Button -->
+          <button type="button" class="btn-auth-lock locked" id="authLockBtn" onclick="toggleAuthorAuthModal()" title="Author Security Access: Click to unlock publishing access">
+            <span id="authLockIcon">🔒</span>
+            <span id="authLockLabel">AUTHOR LOCKED</span>
+          </button>
+
+          <!-- Profile Quick Action -->
+          <button type="button" class="btn-profile-trigger" onclick="openProfileModal()" title="View & Edit Researcher Profile">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span id="navProfileNameLabel">SARMANSINH</span>
+          </button>
+
+          <button type="button" class="btn-mistral" onclick="openWriterModal()" title="Write a New Write-up">
+            <span>+ New Write-up</span>
+            <div class="btn-icon-wrapper" aria-hidden="true">
+              <svg class="arrow-slide arrow-default" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+              </svg>
+              <svg class="arrow-slide arrow-hover" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+              </svg>
+            </div>
+          </button>
+
+          <!-- Dark/Light Theme Switcher -->
+          <button type="button" class="btn-theme-toggle" id="themeToggleBtn" aria-label="Toggle theme">
+            <!-- Icon populated dynamically via app.js -->
+          </button>
+
+          <!-- Mobile Hamburger Toggle -->
+          <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main>
+      
+      <!-- HERO SECTION -->
+      <section class="hero-section" id="hero">
+        <div class="hero-content reveal-on-scroll">
+          <!-- Prominent Researcher Name & Identity Banner -->
+          <div class="hero-researcher-tag">
+            <span class="pixel-cube"></span>
+            <span class="researcher-title-name" id="heroResearcherName">SARMANSINH</span>
+            <span style="color:var(--flame-3);">//</span>
+            <span>APPLICATION SECURITY RESEARCHER</span>
+          </div>
+
+          <h1 class="hero-title">
+            Web App
+            <span class="title-accent">Security</span>
+          </h1>
+
+          <p class="hero-bio">
+            I break authentication flows, chain business-logic bugs, and trace attack paths across live production targets — reported through HackerOne and Bugcrowd, on programs spanning fintech, social platforms, and delivery infrastructure.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#writeups" class="btn-mistral">
+              <span>Explore Write-ups</span>
+              <div class="btn-icon-wrapper" aria-hidden="true">
+                <svg class="arrow-slide arrow-default" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+                </svg>
+                <svg class="arrow-slide arrow-hover" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+                </svg>
+              </div>
+            </a>
+
+            <a href="#where-i-report" class="btn-ghost">
+              <span>Where I Report</span>
+            </a>
+
+            <button type="button" class="btn-ghost" onclick="openWriterModal()">
+              <span>+ Add Write-up</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mistral-Style Stepped Pixel Visual Showcase -->
+        <div class="hero-visual reveal-on-scroll">
+          <div class="pixel-art-showcase">
+            <span class="corner-plus tl">+</span>
+            <span class="corner-plus tr">+</span>
+            <span class="corner-plus bl">+</span>
+            <span class="corner-plus br">+</span>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-primary); padding-bottom: 8px;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);">TARGET_STATE: LIVE</span>
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--flame-3);">H1 // BUGCROWD</span>
+            </div>
+
+            <!-- Stepped Pixel Flame Architecture -->
+            <div class="pixel-art-center">
+              <div class="mistral-flame-blocks" aria-label="Pixel art flame visual">
+                <div class="flame-row">
+                  <div class="pixel-rect pixel-color-1"></div>
+                  <div class="pixel-rect pixel-color-1"></div>
+                  <div class="pixel-rect pixel-color-dark" style="opacity: 0.2;"></div>
+                  <div class="pixel-rect pixel-color-1"></div>
+                  <div class="pixel-rect pixel-color-1"></div>
+                </div>
+                <div class="flame-row">
+                  <div class="pixel-rect pixel-color-2"></div>
+                  <div class="pixel-rect pixel-color-2"></div>
+                  <div class="pixel-rect pixel-color-2"></div>
+                  <div class="pixel-rect pixel-color-2"></div>
+                  <div class="pixel-rect pixel-color-2"></div>
+                  <div class="pixel-rect pixel-color-2"></div>
+                </div>
+                <div class="flame-row">
+                  <div class="pixel-rect pixel-color-3"></div>
+                  <div class="pixel-rect pixel-color-3"></div>
+                  <div class="pixel-rect pixel-color-3"></div>
+                  <div class="pixel-rect pixel-color-3"></div>
+                  <div class="pixel-rect pixel-color-3"></div>
+                  <div class="pixel-rect pixel-color-3"></div>
+                  <div class="pixel-rect pixel-color-3"></div>
+                  <div class="pixel-rect pixel-color-3"></div>
+                </div>
+                <div class="flame-row">
+                  <div class="pixel-rect pixel-color-4"></div>
+                  <div class="pixel-rect pixel-color-4"></div>
+                  <div class="pixel-rect pixel-color-4"></div>
+                  <div class="pixel-rect pixel-color-4"></div>
+                  <div class="pixel-rect pixel-color-4"></div>
+                  <div class="pixel-rect pixel-color-4"></div>
+                </div>
+                <div class="flame-row">
+                  <div class="pixel-rect pixel-color-5"></div>
+                  <div class="pixel-rect pixel-color-5"></div>
+                  <div class="pixel-rect pixel-color-dark" style="opacity: 0.2;"></div>
+                  <div class="pixel-rect pixel-color-dark" style="opacity: 0.2;"></div>
+                  <div class="pixel-rect pixel-color-5"></div>
+                  <div class="pixel-rect pixel-color-5"></div>
+                </div>
+              </div>
+
+              <div class="pixel-console-badge">
+                [ AUTH_FLOW // BUSINESS_LOGIC // ATTACK_PATH ]
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-primary); padding-top: 8px;">
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted);">EXPLOIT: LOGIC_CHAIN</span>
+              <span style="font-family: var(--font-mono); font-size: 0.68rem; color: #10B981;">STATUS: RESOLVED</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TICKER / STATS BAR -->
+      <section class="ticker-bar stagger-parent" aria-label="Security Metrics Summary">
+        <div class="ticker-item reveal-child">
+          <span class="ticker-label">// Platforms Active</span>
+          <span class="ticker-value">HackerOne & Bugcrowd</span>
+        </div>
+        <div class="ticker-item reveal-child">
+          <span class="ticker-label">// Primary Vectors</span>
+          <span class="ticker-value">Auth & Business Logic</span>
+        </div>
+        <div class="ticker-item reveal-child">
+          <span class="ticker-label">// Programs Covered</span>
+          <span class="ticker-value"><span class="highlight">8+</span> Top Tier Targets</span>
+        </div>
+        <div class="ticker-item reveal-child">
+          <span class="ticker-label">// Disclosures & Writeups</span>
+          <span class="ticker-value" id="tickerReportedBugs">8+ Documented</span>
+        </div>
+      </section>
+
+      <!-- WHERE I REPORT SECTION -->
+      <section class="section-container" id="where-i-report">
+        <div class="section-header-row reveal-on-scroll">
+          <div class="section-header-left">
+            <span class="section-pretitle">// PLATFORM DISCLOSURES</span>
+            <h2 class="section-title">Where I Report</h2>
+            <p class="section-subtitle">Active on HackerOne &amp; Bugcrowd — triaged and validated through coordinated disclosure programs.</p>
+          </div>
+          <div>
+            <span class="platform-badge">Verified Researcher</span>
+          </div>
+        </div>
+
+        <div class="platforms-grid stagger-parent">
+          <!-- HackerOne Platform Card -->
+          <article class="platform-card reveal-child">
+            <div>
+              <div class="platform-card-header">
+                <span class="platform-badge">Active Platform</span>
+                <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);">hackerone.com</span>
+              </div>
+              <div class="platform-brand">
+                <div class="platform-icon">H1</div>
+                <div>
+                  <h3 class="platform-name">HackerOne</h3>
+                  <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--flame-3);">Private &amp; Public Bug Bounty Programs</span>
+                </div>
+              </div>
+              <p class="platform-description">
+                Reporting critical authentication flow bypasses, broken object level authorization (BOLA/IDOR), and account takeover vectors across global enterprise targets.
+              </p>
+              <div class="platform-tags">
+                <span class="tech-tag">OAuth 2.0 PKCE</span>
+                <span class="tech-tag">SSO Session Fixation</span>
+                <span class="tech-tag">IDOR</span>
+                <span class="tech-tag">Privilege Escalation</span>
+                <span class="tech-tag">Financial Workflows</span>
+              </div>
+            </div>
+            <div class="platform-card-footer">
+              <div class="platform-stats-row">
+                <div class="stat-metric">
+                  <span class="stat-num" style="color:var(--flame-3);">TOP 10%</span>
+                  <span class="stat-desc">Signal &amp; Impact</span>
+                </div>
+                <div class="stat-metric">
+                  <span class="stat-num">Valid</span>
+                  <span class="stat-desc">High Triaged Rate</span>
+                </div>
+              </div>
+              <a href="https://hackerone.com" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="padding: 6px 14px; font-size: 0.75rem;">
+                <span>View Scope</span>
+              </a>
+            </div>
+          </article>
+
+          <!-- Bugcrowd Platform Card -->
+          <article class="platform-card reveal-child">
+            <div>
+              <div class="platform-card-header">
+                <span class="platform-badge" style="color:var(--accent-cyan); border-color:rgba(0,130,230,0.3); background:rgba(0,130,230,0.1);">Active Platform</span>
+                <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-muted);">bugcrowd.com</span>
+              </div>
+              <div class="platform-brand">
+                <div class="platform-icon" style="color:var(--accent-cyan);">BC</div>
+                <div>
+                  <h3 class="platform-name">Bugcrowd</h3>
+                  <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-cyan-light);">Managed Programs &amp; VDP Portfolios</span>
+                </div>
+              </div>
+              <p class="platform-description">
+                Uncovering high-impact business logic anomalies, concurrency race conditions, and attack chains traversing modern microservice &amp; cloud architectures.
+              </p>
+              <div class="platform-tags">
+                <span class="tech-tag">Race Conditions</span>
+                <span class="tech-tag">Business Logic</span>
+                <span class="tech-tag">GraphQL Mutations</span>
+                <span class="tech-tag">SSRF</span>
+                <span class="tech-tag">Coupon/Cart Abuse</span>
+              </div>
+            </div>
+            <div class="platform-card-footer">
+              <div class="platform-stats-row">
+                <div class="stat-metric">
+                  <span class="stat-num" style="color:var(--accent-cyan);">P1 / P2</span>
+                  <span class="stat-desc">Severity Focus</span>
+                </div>
+                <div class="stat-metric">
+                  <span class="stat-num">100%</span>
+                  <span class="stat-desc">Responsible Disclosure</span>
+                </div>
+              </div>
+              <a href="https://bugcrowd.com" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="padding: 6px 14px; font-size: 0.75rem;">
+                <span>View Scope</span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- LIVE PRODUCTION TARGETS GRID -->
+      <section class="section-container" id="targets">
+        <div class="section-header-row reveal-on-scroll">
+          <div class="section-header-left">
+            <span class="section-pretitle">// REPORTED TARGETS</span>
+            <h2 class="section-title">Programs &amp; Production Targets</h2>
+            <p class="section-subtitle">Programs spanning fintech, health, social commerce, and delivery infrastructure.</p>
+          </div>
+          <div>
+            <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">[ 8 PROGRAMS REPORTED ]</span>
+          </div>
+        </div>
+
+        <!-- Filter Bar by Sector -->
+        <div class="targets-filter-bar reveal-on-scroll">
+          <button type="button" class="filter-tab-btn target-filter-tab active" data-sector="all">All Programs</button>
+          <button type="button" class="filter-tab-btn target-filter-tab" data-sector="fintech">Fintech</button>
+          <button type="button" class="filter-tab-btn target-filter-tab" data-sector="ecommerce">Commerce &amp; Delivery</button>
+          <button type="button" class="filter-tab-btn target-filter-tab" data-sector="travel-social">Travel &amp; Creative</button>
+          <button type="button" class="filter-tab-btn target-filter-tab" data-sector="health">Health &amp; Fitness</button>
+        </div>
+
+        <!-- 8 Requested Programs Grid -->
+        <div class="targets-grid stagger-parent" id="targetsGrid">
+          
+          <!-- 1. Fintech: PayPal -->
+          <div class="target-card reveal-child" data-sector="fintech">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">Fintech</span>
+                <span class="target-platform-badge">HackerOne</span>
+              </div>
+              <h3 class="target-name">PayPal</h3>
+              <p class="target-vulnerability-focus">
+                Authentication flows, SSO exchange validations, session downgrade handling, and checkout authorization state verification.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">Critical / High</span>
+            </div>
+          </div>
+
+          <!-- 2. Health & Fitness: MyFitnessPal -->
+          <div class="target-card reveal-child" data-sector="health">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">Health &amp; Fitness</span>
+                <span class="target-platform-badge">Bugcrowd</span>
+              </div>
+              <h3 class="target-name">MyFitnessPal</h3>
+              <p class="target-vulnerability-focus">
+                Cross-tenant API permissions, profile data isolation, calorie and biometric data sync validation, and OAuth token boundaries.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">High / Med</span>
+            </div>
+          </div>
+
+          <!-- 3. Travel: Airbnb -->
+          <div class="target-card reveal-child" data-sector="travel-social">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">Travel</span>
+                <span class="target-platform-badge">HackerOne</span>
+              </div>
+              <h3 class="target-name">Airbnb</h3>
+              <p class="target-vulnerability-focus">
+                Host-to-guest messaging channel isolation, booking transaction state machine verification, and calendar pricing logic.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">High Impact</span>
+            </div>
+          </div>
+
+          <!-- 4. Creative Platform: Pixiv -->
+          <div class="target-card reveal-child" data-sector="travel-social">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">Creative Platform</span>
+                <span class="target-platform-badge">Bugcrowd</span>
+              </div>
+              <h3 class="target-name">Pixiv</h3>
+              <p class="target-vulnerability-focus">
+                Media pipeline pre-signed URL parameter poisoning, creator monetization flow controls, and account verification bypasses.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">High Severity</span>
+            </div>
+          </div>
+
+          <!-- 5. Social Commerce: Meesho -->
+          <div class="target-card reveal-child" data-sector="ecommerce">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">Social Commerce</span>
+                <span class="target-platform-badge">Bug Bounty</span>
+              </div>
+              <h3 class="target-name">Meesho</h3>
+              <p class="target-vulnerability-focus">
+                Reseller order fulfillment state manipulation, GraphQL mutation resolver scope leaks, and supplier margin pricing integrity.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">BOLA / Logic</span>
+            </div>
+          </div>
+
+          <!-- 6. Quick Commerce: Blinkit / Hyperpure -->
+          <div class="target-card reveal-child" data-sector="ecommerce">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">Quick Commerce</span>
+                <span class="target-platform-badge">Bug Bounty</span>
+              </div>
+              <h3 class="target-name">Blinkit / Hyperpure</h3>
+              <p class="target-vulnerability-focus">
+                Microsecond race conditions in coupon processing, warehouse delivery geofence checks, and wholesale pricing rate concurrency.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">Race Condition</span>
+            </div>
+          </div>
+
+          <!-- 7. E-commerce: Flipkart -->
+          <div class="target-card reveal-child" data-sector="ecommerce">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">E-commerce</span>
+                <span class="target-platform-badge">Bug Bounty</span>
+              </div>
+              <h3 class="target-name">Flipkart</h3>
+              <p class="target-vulnerability-focus">
+                Account recovery state machine boundary bypasses, cart item tampering, and payment callback signature validation integrity.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">High Severity</span>
+            </div>
+          </div>
+
+          <!-- 8. Fintech: bancoplata.mx -->
+          <div class="target-card reveal-child" data-sector="fintech">
+            <div class="target-card-top">
+              <div class="target-meta-row">
+                <span class="target-category-pill">Fintech</span>
+                <span class="target-platform-badge">HackerOne</span>
+              </div>
+              <h3 class="target-name">bancoplata.mx</h3>
+              <p class="target-vulnerability-focus">
+                Credit evaluation mass assignment, digital banking SPEI transfer logic, financial document IDOR, and two-factor step skipping.
+              </p>
+            </div>
+            <div class="target-card-bottom">
+              <span class="target-hall-badge">Reported &amp; Resolved</span>
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--flame-3);">Critical</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- WRITE-UPS & CTF WALKTHROUGHS SECTION (With Interactive Custom Writeup Publishing) -->
+      <section class="section-container" id="writeups">
+        <div class="section-header-row reveal-on-scroll">
+          <div class="section-header-left">
+            <span class="section-pretitle">// TECHNICAL DISCLOSURES</span>
+            <h2 class="section-title">Write-ups &amp; CTF Walkthroughs</h2>
+            <p class="section-subtitle">Vulnerability reproduction steps, exploit chains, and deep CTF solution methodology.</p>
+          </div>
+          <div>
+            <button type="button" class="btn-mistral" onclick="openWriterModal()">
+              <span>+ Create Write-up</span>
+              <div class="btn-icon-wrapper" aria-hidden="true">
+                <svg class="arrow-slide arrow-default" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+                </svg>
+                <svg class="arrow-slide arrow-hover" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+                </svg>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controls: Tabs, Search & Backup -->
+        <div class="writeups-controls-bar">
+          <div class="writeups-filter-tabs">
+            <button type="button" class="filter-tab-btn writeup-category-tab active" data-category="all">
+              All <span id="badgeCountAll">[8]</span>
+            </button>
+            <button type="button" class="filter-tab-btn writeup-category-tab" data-category="write-ups">
+              Write-ups <span id="badgeCountWriteups">[5]</span>
+            </button>
+            <button type="button" class="filter-tab-btn writeup-category-tab" data-category="ctf-walkthroughs">
+              CTF Walkthroughs <span id="badgeCountCTF">[3]</span>
+            </button>
+          </div>
+
+          <!-- Real-time search filter -->
+          <div class="search-input-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+            <input type="text" id="writeupSearchInput" placeholder="Filter by bug, target, or tag (e.g. OAuth, IDOR, HTB)..." aria-label="Search write-ups">
+          </div>
+
+          <!-- Backup / Import Tools -->
+          <div class="writeups-action-btns">
+            <button type="button" class="btn-ghost" onclick="exportWriteupsJSON()" title="Export write-ups backup">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>Export</span>
+            </button>
+            <label class="btn-ghost" style="cursor: pointer;" title="Import write-ups from JSON">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>Import</span>
+              <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importWriteupsJSON(event)">
+            </label>
+          </div>
+        </div>
+
+        <!-- Rendered Write-ups Dynamic Container -->
+        <div class="writeups-list" id="writeupsListContainer">
+          <!-- Populated by app.js -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Site Footer in Mistral Retro Style -->
+    <footer class="site-footer">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <div class="brand-text" style="font-size: 1.1rem;">
+            <span>APPSEC</span>
+            <span style="color: var(--flame-3);">//</span>
+            <span>RESEARCH</span>
+          </div>
+          <p class="footer-manifesto">
+            Breaking complex production logic to secure real-world systems.
+          </p>
+          <p class="footer-bio-sub">
+            All vulnerability reports follow strict Coordinated Vulnerability Disclosure (CVD) timelines. Testing is conducted within documented program authorization scopes.
+          </p>
+        </div>
+
+        <div class="footer-links-col">
+          <span class="footer-col-title">// Disclosure Platforms</span>
+          <a href="https://hackerone.com" target="_blank" rel="noopener noreferrer" class="footer-link">
+            <span>→ HackerOne Profile</span>
+          </a>
+          <a href="https://bugcrowd.com" target="_blank" rel="noopener noreferrer" class="footer-link">
+            <span>→ Bugcrowd Profile</span>
+          </a>
+          <a href="#targets" class="footer-link">
+            <span>→ Target History</span>
+          </a>
+          <a href="#writeups" class="footer-link">
+            <span>→ Vulnerability Index</span>
+          </a>
+        </div>
+
+        <div class="footer-links-col">
+          <span class="footer-col-title">// Connect &amp; Verify</span>
+          <a href="mailto:security-research@domain.internal" class="footer-link">
+            <span>→ Security Contact (PGP)</span>
+          </a>
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="footer-link">
+            <span>→ GitHub Repository</span>
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="footer-link">
+            <span>→ X (Twitter)</span>
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="footer-link">
+            <span>→ LinkedIn</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          <span>© 2026 Web App Security Researcher. Designed in Mistral UI aesthetic.</span>
+        </div>
+        <div style="display: flex; gap: 16px;">
+          <span>STATUS: ONLINE</span>
+          <span>•</span>
+          <span>SCOPES: H1 // BUGCROWD</span>
+          <span>•</span>
+          <span>LOCAL_TIME: <span id="footerClock">LIVE</span></span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 1: WRITE-UP READER (Full Detailed View)
+       ========================================================================== -->
+  <dialog class="mistral-modal" id="readerModal" aria-labelledby="readerModalTitle">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="pixel-cube" style="width:8px; height:8px; background-color:var(--flame-3); display:inline-block;"></span>
+        <span class="modal-title-text" id="readerModalTitle">TECHNICAL ANALYSIS // DISCLOSURE</span>
+      </div>
+      <button type="button" class="btn-close-modal" onclick="closeReaderModal()" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body" id="readerModalBody">
+      <!-- Populated dynamically via app.js -->
+    </div>
+  </dialog>
+
+  <!-- ==========================================================================
+       MODAL 2: WRITE-UP CREATOR & EDITOR ("where i can write my own writeups")
+       ========================================================================== -->
+  <dialog class="mistral-modal" id="writerModal" aria-labelledby="writerModalTitle">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="pixel-cube" style="width:8px; height:8px; background-color:var(--flame-3); display:inline-block;"></span>
+        <span class="modal-title-text" id="writerModalTitle">PUBLISH WRITE-UP // CTF WALKTHROUGH</span>
+      </div>
+      <button type="button" class="btn-close-modal" onclick="closeWriterModal()" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="writeupForm" onsubmit="handleWriteupSubmit(event)">
+        
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label" for="formTitle">Write-up Headline / Title *</label>
+            <input type="text" id="formTitle" class="form-control" placeholder="e.g., OAuth 2.0 PKCE Downgrade Leading to Pre-Account Takeover" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formCategory">Category *</label>
+            <select id="formCategory" class="form-control" required>
+              <option value="write-ups">Bug Bounty Write-up</option>
+              <option value="ctf-walkthroughs">CTF Walkthrough</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formTarget">Target / Platform / Scope *</label>
+            <input type="text" id="formTarget" class="form-control" placeholder="e.g. PayPal, Airbnb, HackTheBox" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formSector">Industry Sector</label>
+            <input type="text" id="formSector" class="form-control" placeholder="e.g. Fintech, Social Commerce, CTF">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formSeverity">Severity Level</label>
+            <select id="formSeverity" class="form-control">
+              <option value="Critical">Critical</option>
+              <option value="High" selected>High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+              <option value="Informational">Informational</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formCvss">CVSS 3.1 Score</label>
+            <input type="text" id="formCvss" class="form-control" placeholder="e.g. 8.8" value="8.4">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formDate">Disclosure Date</label>
+            <input type="date" id="formDate" class="form-control">
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label" for="formTags">Tags (Comma-separated)</label>
+            <input type="text" id="formTags" class="form-control" placeholder="OAuth, IDOR, RaceCondition, GraphQL, CTF">
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label" for="formSummary">Executive Summary (Brief)</label>
+            <input type="text" id="formSummary" class="form-control" placeholder="Brief 1-2 sentence overview of the vulnerability discovered...">
+          </div>
+
+          <div class="form-group full-width">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="form-label" for="formContent">Technical Analysis &amp; PoC (Markdown Supported)</label>
+              <div class="editor-tabs-bar">
+                <button type="button" class="editor-tab-btn active" id="tabWriteBtn" onclick="switchEditorTab('write')">Write (Markdown)</button>
+                <button type="button" class="editor-tab-btn" id="tabPreviewBtn" onclick="switchEditorTab('preview')">Preview</button>
+              </div>
+            </div>
+
+            <!-- Toolbar for Quick Step & Screenshot Additions -->
+            <div class="editor-action-toolbar">
+              <button type="button" class="toolbar-action-btn" onclick="insertStepHeader()">
+                <span>+ Add Step</span>
+              </button>
+              <button type="button" class="toolbar-action-btn" onclick="openImageInserterModal()" style="color:var(--flame-3); border-color:var(--flame-3); font-weight:700;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>🖼 Add Step Screenshot / Image</span>
+              </button>
+              <button type="button" class="toolbar-action-btn" onclick="insertPocRequest()">
+                <span>+ HTTP PoC</span>
+              </button>
+              <button type="button" class="toolbar-action-btn" onclick="insertCodeBlockSnippet()">
+                <span>+ Code Block</span>
+              </button>
+              <button type="button" class="toolbar-action-btn" onclick="insertCalloutBanner()">
+                <span>+ Alert / Flag</span>
+              </button>
+            </div>
+
+            <textarea id="formContent" class="form-control" rows="12" placeholder="Write full write-up in Markdown...
+## Vulnerability Description
+...
+## Proof of Concept
+```http
+POST /api/v1/auth HTTP/1.1
+...
+```
+## Impact & Remediation"></textarea>
+
+            <div class="image-drop-hint">
+              <span>💡 Drag &amp; drop screenshots or paste directly from clipboard (Ctrl+V) into the editor</span>
+            </div>
+
+            <div id="editorPreviewBox" class="editor-preview-box article-markdown-body"></div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" onclick="closeWriterModal()">Cancel</button>
+          <button type="submit" class="btn-mistral" style="height: 42px;">
+            <span>Save &amp; Publish Write-up</span>
+            <div class="btn-icon-wrapper" aria-hidden="true">
+              <svg class="arrow-slide arrow-default" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+              </svg>
+              <svg class="arrow-slide arrow-hover" width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"/>
+              </svg>
+            </div>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ==========================================================================
+       MODAL 3: INSERT STEP IMAGE / SCREENSHOT MODAL
+       ========================================================================== -->
+  <dialog class="mistral-modal" id="imageInserterModal" style="max-width: 620px;">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="pixel-cube" style="width:8px; height:8px; background-color:var(--flame-3); display:inline-block;"></span>
+        <span class="modal-title-text">INSERT STEP IMAGE / SCREENSHOT</span>
+      </div>
+      <button type="button" class="btn-close-modal" onclick="closeImageInserterModal()" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 24px;">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="form-group">
+          <label class="form-label" for="stepImageCaption">Step Title / Caption</label>
+          <input type="text" id="stepImageCaption" class="form-control" placeholder="e.g. Step 2: Intercepting HTTP Request in Burp Suite Repeater" value="Step Screenshot">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Option A: Upload Screenshot File from Computer</label>
+          <input type="file" id="stepImageFileInput" accept="image/*" class="form-control" onchange="handleImageFileSelected(event)">
+          <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); margin-top:4px;">Supported: PNG, JPG, WEBP, GIF (Burp Suite captures, shell screenshots, etc.)</span>
+        </div>
+
+        <div style="text-align:center; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">- OR -</div>
+
+        <div class="form-group">
+          <label class="form-label" for="stepImageUrlInput">Option B: External Image URL</label>
+          <input type="url" id="stepImageUrlInput" class="form-control" placeholder="https://i.imgur.com/... or https://raw.githubusercontent.com/...">
+        </div>
+
+        <div id="imagePreviewContainer" style="display:none; text-align:center; border:1px dashed var(--border-primary); padding:12px; background:var(--bg-secondary);">
+          <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); display:block; margin-bottom:8px;">PREVIEW:</span>
+          <img id="imagePreviewImg" src="" alt="Preview" style="max-width:100%; max-height:180px; object-fit:contain; border:1px solid var(--border-primary);">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-ghost" onclick="closeImageInserterModal()">Cancel</button>
+      <button type="button" class="btn-mistral" style="height:40px;" onclick="confirmInsertStepImage()">
+        <span>Insert into Write-up</span>
+      </button>
+    </div>
+  </dialog>
+
+  <!-- ==========================================================================
+       MODAL 4: IMAGE LIGHTBOX (CLICK-TO-ZOOM SCREENSHOTS)
+       ========================================================================== -->
+  <dialog class="mistral-modal" id="imageLightboxModal">
+    <div class="lightbox-content-wrap">
+      <div style="width:100%; display:flex; justify-content:flex-end; margin-bottom:8px;">
+        <button type="button" class="btn-close-modal" onclick="closeImageLightbox()" aria-label="Close Lightbox">✕</button>
+      </div>
+      <img id="lightboxImg" src="" alt="Step Screenshot Full View">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+  </dialog>
+
+  <!-- ==========================================================================
+       MODAL 5: PROFILE & IDENTITY SETTINGS
+       ========================================================================== -->
+  <dialog class="mistral-modal" id="profileModal" style="max-width: 600px;">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="pixel-cube" style="width:8px; height:8px; background-color:var(--flame-3); display:inline-block;"></span>
+        <span class="modal-title-text">RESEARCHER PROFILE &amp; IDENTITY</span>
+      </div>
+      <button type="button" class="btn-close-modal" onclick="closeProfileModal()" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 24px;">
+      <form id="profileForm" onsubmit="handleProfileSubmit(event)">
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="form-group">
+            <label class="form-label" for="profileNameInput">Full Name / Display Name *</label>
+            <input type="text" id="profileNameInput" class="form-control" value="SARMANSINH" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profileHandleInput">Handle / Pseudonym</label>
+            <input type="text" id="profileHandleInput" class="form-control" placeholder="@sarmansinh" value="@sarmansinh">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profileTitleInput">Professional Title / Subhead</label>
+            <input type="text" id="profileTitleInput" class="form-control" value="APPLICATION SECURITY RESEARCHER &amp; BUG HUNTER">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profileH1Input">HackerOne Profile URL</label>
+            <input type="text" id="profileH1Input" class="form-control" placeholder="https://hackerone.com/username">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profileBcInput">Bugcrowd Profile URL</label>
+            <input type="text" id="profileBcInput" class="form-control" placeholder="https://bugcrowd.com/username">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profileBioInput">Hero Bio Statement</label>
+            <textarea id="profileBioInput" class="form-control" rows="3">I break authentication flows, chain business-logic bugs, and trace attack paths across live production targets — reported through HackerOne and Bugcrowd, on programs spanning fintech, social platforms, and delivery infrastructure.</textarea>
+          </div>
+
+        
+
+        <div class="modal-footer" style="margin-top:20px; padding:16px 0 0 0;">
+          <button type="button" class="btn-ghost" onclick="closeProfileModal()">Cancel</button>
+          <button type="submit" class="btn-mistral" style="height:40px;">
+            <span>Save Profile</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ==========================================================================
+       MODAL 6: AUTHOR SECURITY PASSKEY AUTHENTICATION ("Only I can write")
+       ========================================================================== -->
+ <dialog class="mistral-modal" id="authModal" style="max-width: 520px;">
+  <div class="modal-header">
+    <div class="modal-title-wrap">
+      <span class="pixel-cube" style="width:8px; height:8px; background-color:var(--flame-3); display:inline-block;"></span>
+      <span class="modal-title-text">AUTHOR ACCESS // LOGIN</span>
+    </div>
+    <button type="button" class="btn-close-modal" onclick="closeAuthModal()" aria-label="Close modal">✕</button>
+  </div>
+  <div class="modal-body" style="padding: 24px;">
+    <div class="auth-notice-card">
+      <strong>// RESTRICTED ACCESS</strong><br>
+      Only the verified portfolio author can write, publish, edit, or delete write-ups.
+    </div>
+    <form id="authPasskeyForm" onsubmit="handleAuthPasskeySubmit(event)">
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label class="form-label" for="authorEmailInput">Email</label>
+        <input type="email" id="authorEmailInput" class="form-control" required autocomplete="username">
+      </div>
+      <div class="form-group" style="margin-bottom: 8px;">
+        <label class="form-label" for="authorPasskeyInput">Password</label>
+        <input type="password" id="authorPasskeyInput" class="form-control" required autocomplete="current-password">
+      </div>
+      <div id="authError" style="color:#ef4444; font-family:var(--font-mono); font-size:0.75rem; min-height:18px; margin-bottom:12px;"></div>
+      <div class="modal-footer" style="padding:16px 0 0 0; border-top:1px solid var(--border-primary);">
+        <button type="button" class="btn-ghost" onclick="closeAuthModal()">Cancel</button>
+        <button type="submit" class="btn-mistral" style="height:40px;">
+          <span>Sign In</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+   <!-- Script logic -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+
+  <script>
+    // Live Footer Clock
+    function updateClock() {
+      const el = document.getElementById('footerClock');
+      if (el) {
+        const now = new Date();
+        el.textContent = now.toTimeString().split(' ')[0] + ' UTC';
+      }
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>

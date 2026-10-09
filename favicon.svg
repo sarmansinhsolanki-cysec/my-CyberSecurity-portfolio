@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Mistral-inspired signature pixel flame -->
+  <rect x="4" y="6" width="6" height="4" fill="#FFAF01"/>
+  <rect x="22" y="6" width="6" height="4" fill="#FFAF01"/>
+  <rect x="4" y="10" width="10" height="4" fill="#FF8204"/>
+  <rect x="18" y="10" width="10" height="4" fill="#FF8204"/>
+  <rect x="4" y="14" width="24" height="4" fill="#FA500F"/>
+  <rect x="8" y="18" width="16" height="4" fill="#E51300"/>
+  <rect x="4" y="22" width="10" height="4" fill="#C4001D"/>
+  <rect x="18" y="22" width="10" height="4" fill="#C4001D"/>
+</svg>
